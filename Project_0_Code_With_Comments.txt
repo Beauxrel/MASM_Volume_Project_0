@@ -1,0 +1,126 @@
+; AddTwo.asm - adds two 32-bit integers.
+; Chapter 3 example
+
+.386
+.model flat,stdcall
+.stack 4096
+ExitProcess proto,dwExitCode:dword
+Include irvine32.inc
+
+.data
+; Prompt text to let user know what to enter or what is showing up.
+	Prompt1			BYTE "Enter Feet: ",0					; Asking user to enter value in feet.
+	Prompt2			BYTE "Enter Inches: ",0					; Asking user to enter value in inches.
+	Prompt3			BYTE "======== Enter Length ======== ",10,13,0
+	Prompt4			BYTE "======== Enter Width ========= ",10,13,0
+	Prompt5			BYTE "======== Enter Depth ========= ",10,13,0
+;String of text for result
+	result			BYTE "Your volume is ",0
+	result1			BYTE " cu. ft Inches, ",0
+	result2			BYTE " which is ", 0					
+	result3			BYTE " feet and ", 0
+	result4			BYTE " cu. Inches"
+
+	numL	DWORD	?
+	numW	DWORD	?
+	numD	DWORD	?
+	sum		DWORD	?
+
+.code
+;================================
+Divide:				; Divide function to divide the total volume which is in 'cubic inches' to 'cubic feet and cubic inches'.
+xor edx,edx
+mov ebx, 1728			;Storing 1728 value in ebx.
+div ebx				;Dividing eax by ebx (1728)
+mov ebx,edx
+ret				;return
+;================================
+Multiply:			;Multiplication function for calculating volume in cubic inches
+xor eax, eax
+xor ebx, ebx
+mov ebx, numL			;Storing length in ebx
+mov eax, numW			;Storing width in eax
+imul ebx			;Signed multiplication of eax with ebx. (Length*width)
+mov ebx,eax
+mov eax,numD			; storing depth in eax.
+mul ebx				; Multiplication of product obtained from above with depth.
+ret				; return.
+;================================
+P1:
+mov edx, OFFSET Prompt1		; Moving the address of Prompt1 to edx.
+call WriteString		; To print Prompt1.
+call ReadDec			; To read the values entered by the user.
+mul ebx				; To convert feet value into inch value.
+ret
+;================================
+P2:
+mov edx, OFFSET Prompt2		; Moving the address of Prompt2 to edx.
+call WriteString		; To print Prompt1.
+call ReadDec			; To read the values entered by the user.
+ret
+;================================
+
+main PROC
+
+;User Input
+
+xor edx,edx			; Using xor to empty the registors i.e setting them to zero (0).	
+xor eax,eax			; Using xor to empty the registors i.e setting them to zero (0).
+xor ebx,ebx			; Using xor to empty the registors i.e setting them to zero (0).
+mov ebx, 12			; Moving 12 value to ebx for the purpose of converting feet into inches.
+;Length
+	mov edx, OFFSET Prompt3
+	call writeString
+	call P1			; Calling P1 function to get values from the user.
+	add numL, eax		; Adding numL and eax.
+	call P2
+	add numL,eax
+	call Clrscr		; Clearing screen .
+;Width
+	mov edx, OFFSET Prompt4
+	call writeString
+	call P1
+	add numW, eax
+	call P2
+	add numW,eax
+	call Clrscr
+;Depth
+	mov edx, OFFSET Prompt5
+	call writeString
+	call P1
+	add numD, eax
+	call P2
+	add numD,eax
+	call Clrscr
+
+;Result Output
+
+call Multiply			;Calling Multiply function to calculate the total volume of the Rectangualr prism.
+mov edx, OFFSET result
+call WriteString
+call Writedec			;To display the eax term.
+
+mov edx, OFFSET result1
+call WriteString
+
+call Divide			;Calling Divide function to calculate the volume in terms of cubic feet and cubic inches.
+mov edx, OFFSET result2
+call WriteString
+call Writedec
+
+mov edx, OFFSET result3
+call WriteString
+mov eax,ebx
+call writedec
+
+mov edx, OFFSET result4
+call WriteString
+
+;call CubicFeet
+;mov edx, OFFSET cubicfoot
+
+	
+
+exit
+main endp
+end main			;End of program.
